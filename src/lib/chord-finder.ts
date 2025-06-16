@@ -47,12 +47,30 @@ function noteAt(stringNum: StringNumber, fret: FretNumber): string | null {
   return chromaticScale[noteIndex];
 }
 
-// Utility: count fingers used (exclude muted strings)
 function countFingers(shape: FingerPosition[]): number {
-  return shape.filter(pos => pos.fret > 0).length;
+  const fretToStrings = new Map<number, Set<StringNumber>>();
+
+  for (const pos of shape) {
+    if (pos.fret > 0) {
+      if (!fretToStrings.has(pos.fret)) {
+        fretToStrings.set(pos.fret, new Set());
+      }
+      fretToStrings.get(pos.fret)!.add(pos.string);
+    }
+  }
+
+  let fingerCount = 0;
+  for (const [fret, strings] of fretToStrings) {
+    if (strings.size === 1) {
+      fingerCount += 1;
+    } else {
+      fingerCount += 1;
+    }
+  }
+
+  return fingerCount;
 }
 
-// Utility: calculate fret span
 function fretSpan(shape: FingerPosition[]): number {
   const frets = shape
     .filter(pos => pos.fret > 0)
@@ -176,14 +194,6 @@ export function generateCandidateShapes(
 
     if (constraints.allowMutedStrings) {
       possibleFrets.push(-1); // muted
-    }
-
-    if (
-      constraints.allowOpenStrings &&
-      !possibleFrets.includes(0) &&
-      chordSpec.notes.has(openStringNotes[stringNum])
-    ) {
-      possibleFrets.push(0);
     }
 
     for (const fret of possibleFrets) {
