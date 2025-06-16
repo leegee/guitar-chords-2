@@ -1,4 +1,4 @@
-type StringNumber = 1 | 2 | 3 | 4 | 5 | 6;
+export type StringNumber = 1 | 2 | 3 | 4 | 5 | 6;
 type FretNumber = number; // 0 = open, -1 = muted
 
 export interface ChordSpec {
@@ -20,6 +20,8 @@ export interface ConstraintProfile {
   allowMutedStrings: boolean;
   requireRootInBass: boolean;
 }
+
+const FIXED_MAX_FRET = 5;
 
 // Standard tuning notes on open strings, low E=string 6
 const openStringNotes: Record<StringNumber, string> = {
@@ -70,7 +72,7 @@ function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): 
     if (!fretMap.has(pos.fret)) fretMap.set(pos.fret, []);
     fretMap.get(pos.fret)!.push(pos.string);
   }
-  for (const [fret, strings] of fretMap.entries()) {
+  for (const [_fret, strings] of fretMap.entries()) {
     if (strings.length > 1) {
       if (constraints.barOnlyAdjacentStrings) {
         // Check if strings are contiguous
@@ -144,9 +146,9 @@ export function generateCandidateShapes(
     // Get possible frets for this string under chordSpec and constraints
     const possibleFrets: FretNumber[] = [];
 
-    const maxFretToCheck = constraints.maxFretSpan + 2;
+    // const maxFretToCheck = constraints.maxFretSpan + 2;
 
-    for (let fret = 0; fret <= maxFretToCheck; fret++) {
+    for (let fret = 0; fret <= FIXED_MAX_FRET; fret++) {
       const note = noteAt(stringNum, fret);
       if (note && chordSpec.notes.has(note)) {
         possibleFrets.push(fret);
