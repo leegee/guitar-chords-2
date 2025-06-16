@@ -55,7 +55,7 @@ function countFingers(shape: FingerPosition[]): number {
 // Utility: calculate fret span
 function fretSpan(shape: FingerPosition[]): number {
   const frets = shape
-    .filter(pos => pos.fret >= 0)
+    .filter(pos => pos.fret > 0)
     .map(pos => pos.fret);
   if (frets.length === 0) return 0;
   return Math.max(...frets) - Math.min(...frets);

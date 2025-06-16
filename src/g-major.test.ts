@@ -47,6 +47,8 @@ test("G major chord candidate shapes generate and include root note", () => {
 
     const chordShapes: FingerPosition[][] = generateCandidateShapes(G, constraints);
 
+    console.log(JSON.stringify(chordShapes))
+
     assert.ok(chordShapes.length > 0, "No chord shapes generated");
 
     for (const shape of chordShapes) {
