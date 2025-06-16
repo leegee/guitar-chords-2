@@ -78,8 +78,6 @@ test("Open G chord contains classic root-position shape", () => {
         1: 3,
     };
 
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-
     function matchesClassicG(shape: FingerPosition[]): boolean {
         debugger;
         const shapeMap = new Map(shape.map(fp => [fp.string, fp.fret]));
