@@ -49,7 +49,7 @@ function noteAt(stringNum: StringNumber, fret: FretNumber): string | null {
 
 // Utility: count fingers used (exclude muted strings)
 function countFingers(shape: FingerPosition[]): number {
-  return shape.filter(pos => pos.fret >= 0).length;
+  return shape.filter(pos => pos.fret > 0).length;
 }
 
 // Utility: calculate fret span
@@ -61,7 +61,6 @@ function fretSpan(shape: FingerPosition[]): number {
   return Math.max(...frets) - Math.min(...frets);
 }
 
-// Check if barre shape is valid (if barre used and barOnlyAdjacentStrings is true)
 function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): boolean {
   if (!constraints.allowBarres) return true;
   // Detect barre: multiple strings fretted at same fret with one finger
@@ -116,7 +115,6 @@ function violatesConstraints(shape: FingerPosition[], constraints: ConstraintPro
   if (countFingers(shape) > constraints.maxFingers) return true;
   if (fretSpan(shape) > constraints.maxFretSpan) return true;
   if (!barreIsValid(shape, constraints)) return true;
-  // Can add more early pruning here if needed
   return false;
 }
 
