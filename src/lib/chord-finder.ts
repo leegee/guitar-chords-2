@@ -15,13 +15,12 @@ export interface ConstraintProfile {
   maxFingers: number;
   maxFretSpan: number;
   allowBarres: boolean;
-  barOnlyAdjacentStrings: boolean;
   allowOpenStrings: boolean;
   allowMutedStrings: boolean;
   requireRootInBass: boolean;
 }
 
-const FIXED_MAX_FRET = 5;
+const FIXED_MAX_FRET = 7;
 
 // Standard tuning notes on open strings, low E=string 6
 const openStringNotes: Record<StringNumber, string> = {
@@ -111,12 +110,6 @@ function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): 
         }
       }
 
-      // Consider it a barre only if it spans > 2 adjacent strings
-      if (maxAdj >= 2) {
-        if (constraints.barOnlyAdjacentStrings && maxAdj !== sorted.length) {
-          return false;
-        }
-      }
     }
   }
 

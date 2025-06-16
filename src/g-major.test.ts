@@ -18,7 +18,6 @@ const constraints: ConstraintProfile = {
     maxFingers: 4,
     maxFretSpan: 4,
     allowBarres: true,
-    barOnlyAdjacentStrings: true,
     allowOpenStrings: true,
     allowMutedStrings: true,
     requireRootInBass: false,
