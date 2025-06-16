@@ -80,7 +80,6 @@ button:focus-visible {
   font-family: monospace;
   user-select: none;
   background-color: #1e1e1e;
-  /* dark background */
   padding: 8px 12px;
   border-radius: 8px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
@@ -128,12 +127,5 @@ button:focus-visible {
 .note {
   background: #444;
   color: #1abc9c;
-  /* teal-ish finger marker */
   box-shadow: 0 0 6px #1abc9caa;
-}
-
-.note:hover {
-  background-color: #16a085;
-  color: #fff;
-  box-shadow: 0 0 8px #16a085ee;
 }
