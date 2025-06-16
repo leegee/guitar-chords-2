@@ -63,27 +63,36 @@ function fretSpan(shape: FingerPosition[]): number {
 
 function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): boolean {
   if (!constraints.allowBarres) return true;
-  // Detect barre: multiple strings fretted at same fret with one finger
-  // Simplify: if any fret is used on >1 string, check adjacency
+
+  // Map frets to list of strings fretted at that fret
   const fretMap = new Map<number, number[]>();
+
   for (const pos of shape) {
-    if (pos.fret < 0) continue;
-    if (!fretMap.has(pos.fret)) fretMap.set(pos.fret, []);
+    if (pos.fret <= 0) continue; // Skip muted (-1) and open (0) strings
+
+    if (!fretMap.has(pos.fret)) {
+      fretMap.set(pos.fret, []);
+    }
     fretMap.get(pos.fret)!.push(pos.string);
   }
+
   for (const [_fret, strings] of fretMap.entries()) {
     if (strings.length > 1) {
       if (constraints.barOnlyAdjacentStrings) {
-        // Check if strings are contiguous
+        // Check if the fretted strings are contiguous
         const sorted = strings.sort((a, b) => a - b);
         for (let i = 1; i < sorted.length; i++) {
-          if (sorted[i] !== sorted[i - 1] + 1) return false;
+          if (sorted[i] !== sorted[i - 1] + 1) {
+            return false; // non-contiguous → not a valid barre
+          }
         }
       }
     }
   }
-  return true;
+
+  return true; // no invalid barres found
 }
+
 
 // Check if root is in bass (lowest played string)
 function rootInBass(shape: FingerPosition[], chordSpec: ChordSpec): boolean {
