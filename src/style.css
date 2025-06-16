@@ -77,35 +77,63 @@ button:focus-visible {
 
 .chord-diagram {
   display: inline-block;
-  margin: 1rem;
-  font-family: sans-serif;
+  font-family: monospace;
+  user-select: none;
+  background-color: #1e1e1e;
+  /* dark background */
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+  color: #ddd;
 }
 
 .top-row,
 .fret-row {
-  display: grid;
-  grid-template-columns: repeat(6, 20px);
-  justify-content: center;
-  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.fret-label {
+  width: 2em;
+  text-align: right;
+  padding-right: 6px;
+  font-size: 0.75em;
+  color: #aaa;
+  font-weight: 600;
+  user-select: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .marker,
 .note {
-  width: 20px;
-  height: 20px;
+  width: 1.8em;
+  height: 1.8em;
+  line-height: 1.8em;
   text-align: center;
-  line-height: 20px;
-  border-bottom: 1px solid #ccc;
+  border: 1px solid #444;
+  box-sizing: border-box;
+  margin-right: 2px;
+  font-weight: bold;
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+  cursor: default;
+  user-select: none;
 }
 
-.fret-row .note {
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
+.marker {
+  background: #333;
+  color: #bbb;
 }
 
-.fret-label {
-  text-align: left;
-  font-size: 0.8em;
-  color: #666;
-  margin: 0.2em 0;
+.note {
+  background: #444;
+  color: #1abc9c;
+  /* teal-ish finger marker */
+  box-shadow: 0 0 6px #1abc9caa;
+}
+
+.note:hover {
+  background-color: #16a085;
+  color: #fff;
+  box-shadow: 0 0 8px #16a085ee;
 }

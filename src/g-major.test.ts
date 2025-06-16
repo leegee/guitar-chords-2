@@ -59,8 +59,8 @@ test("G major chord candidate shapes generate and include root note", () => {
 
         assert.ok(notesInShape.has("G"), "Chord shape missing root note G");
 
-        // printChordDiagram(shape);
-        // console.log("\n");
+        printChordDiagram(shape);
+        console.log("\n");
     }
 });
 
