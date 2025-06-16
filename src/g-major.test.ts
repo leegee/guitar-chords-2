@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
+import { printChordDiagram } from "./lib/print-chord-diagram";
 import {
     generateCandidateShapes,
-    printChordDiagram,
     type ChordSpec,
     type ConstraintProfile,
     type FingerPosition,

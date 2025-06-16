@@ -59,7 +59,7 @@ function countFingers(shape: FingerPosition[]): number {
   }
 
   let fingerCount = 0;
-  for (const [fret, strings] of fretToStrings) {
+  for (const [_fret, strings] of fretToStrings) {
     if (strings.size === 1) {
       fingerCount += 1;
     } else {
@@ -77,6 +77,45 @@ function fretSpan(shape: FingerPosition[]): number {
   if (frets.length === 0) return 0;
   return Math.max(...frets) - Math.min(...frets);
 }
+
+function pruneMutedShapes(shapes: FingerPosition[][]): FingerPosition[][] {
+  const keep: FingerPosition[][] = [];
+
+  outer: for (const shape of shapes) {
+    for (const other of shapes) {
+      if (shape === other) continue;
+
+      let isSuperset = true;
+
+      for (let string = 6; string >= 1; string--) {
+        const a = shape.find(p => p.string === string);
+        const b = other.find(p => p.string === string);
+
+        if (!a || !b) continue; // shouldn't happen
+
+        if (a.fret === -1 && b.fret !== -1) {
+          // a mutes, b plays — OK
+          continue;
+        } else if (a.fret !== b.fret) {
+          // different frets, not a match
+          isSuperset = false;
+          break;
+        }
+      }
+
+      if (isSuperset) {
+        // shape mutes something that is played in `other` with same other frets — discard it
+        continue outer;
+      }
+    }
+
+    // No superset found — keep it
+    keep.push(shape);
+  }
+
+  return keep;
+}
+
 
 function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): boolean {
   if (!constraints.allowBarres) return true;
@@ -210,43 +249,10 @@ export function generateCandidateShapes(
     }
   }
 
-  return Array.from(uniqueMap.values());
+
+  const uniqueArray = Array.from(uniqueMap.values());
+  const prunedShapes = pruneMutedShapes(uniqueArray);
+  return prunedShapes;
 }
 
 
-export function printChordDiagram(shape: FingerPosition[]): void {
-  // Sort shape by string ascending (6 to 1 left to right)
-  const strings: StringNumber[] = [6, 5, 4, 3, 2, 1];
-
-  // Find max fret used (ignore muted)
-  const fretsUsed = shape.filter(p => p.fret > 0).map(p => p.fret);
-  const maxFret = fretsUsed.length ? Math.max(...fretsUsed) : 1;
-
-  // Build header with string numbers
-  const header = strings.map(s => ` ${s} `).join("|");
-  console.log(`  ${header}`);
-
-  // First line: mark open or muted strings
-  const openMutedLine = strings
-    .map((s) => {
-      const pos = shape.find(p => p.string === s);
-      if (!pos) return "   ";
-      if (pos.fret === -1) return " X ";
-      if (pos.fret === 0) return " 0 ";
-      return "   ";
-    })
-    .join("|");
-  console.log(`  ${openMutedLine}`);
-
-  // Draw frets from 1 to maxFret
-  for (let fret = 1; fret <= maxFret; fret++) {
-    const line = strings
-      .map((s) => {
-        const pos = shape.find(p => p.string === s);
-        if (!pos) return "   ";
-        return pos.fret === fret ? " ● " : "   ";
-      })
-      .join("|");
-    console.log(`${fret} ${line}`);
-  }
-}
