@@ -118,7 +118,7 @@ function violatesConstraints(shape: FingerPosition[], constraints: ConstraintPro
   return false;
 }
 
-// Main recursive function to generate candidate shapes
+
 export function generateCandidateShapes(
   chordSpec: ChordSpec,
   constraints: ConstraintProfile,
@@ -144,7 +144,6 @@ export function generateCandidateShapes(
     // Get possible frets for this string under chordSpec and constraints
     const possibleFrets: FretNumber[] = [];
 
-    // Check frets 0 to maxFretSpan + some buffer (say +2)
     const maxFretToCheck = constraints.maxFretSpan + 2;
 
     for (let fret = 0; fret <= maxFretToCheck; fret++) {
@@ -175,8 +174,21 @@ export function generateCandidateShapes(
   }
 
   recurse(0, []);
-  return results;
+
+  // Filter duplicates by generating a key string from each shape
+  const uniqueMap = new Map<string, FingerPosition[]>();
+  for (const shape of results) {
+    // Sort shape by string descending (6 to 1)
+    const sorted = shape.slice().sort((a, b) => b.string - a.string);
+    const key = sorted.map(pos => pos.fret).join(",");
+    if (!uniqueMap.has(key)) {
+      uniqueMap.set(key, shape);
+    }
+  }
+
+  return Array.from(uniqueMap.values());
 }
+
 
 export function printChordDiagram(shape: FingerPosition[]): void {
   // Sort shape by string ascending (6 to 1 left to right)
