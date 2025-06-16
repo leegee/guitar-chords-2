@@ -1,49 +1,38 @@
-import type { FingerPosition } from "./lib/chord-finder";
+import type { FingerPosition } from "./chord-finder";
 
 export function renderChordHTML(shape: FingerPosition[]): string {
-    const NUM_FRETS = 5;
+    const strings = [6, 5, 4, 3, 2, 1];
 
-    // Find the minimum fret used (>0)
-    const fretted = shape
-        .filter(p => p.fret > 0)
-        .map(p => p.fret);
-    const minFret = Math.min(...fretted, 1);
-    const startFret = minFret > 1 ? minFret : 1;
+    // Determine the maximum fret used (>0)
+    const fretsUsed = shape.filter(p => p.fret > 0).map(p => p.fret);
+    const maxFret = fretsUsed.length ? Math.max(...fretsUsed) : 1;
 
-    const stringOrder = [6, 5, 4, 3, 2, 1];
-
-    const topRow = stringOrder.map(s => {
+    // Top row: string markers (x, o, or blank)
+    const topRow = strings.map(s => {
         const pos = shape.find(p => p.string === s);
-        if (!pos || pos.fret < 0) return '<div class="marker">x</div>';
+        if (!pos) return '<div class="marker">&nbsp;</div>';
+        if (pos.fret === -1) return '<div class="marker">x</div>';
         if (pos.fret === 0) return '<div class="marker">o</div>';
         return '<div class="marker">&nbsp;</div>';
     }).join('');
 
-    // Fret rows with notes
+    // Fret rows
     const fretRows = [];
-    for (let fret = startFret; fret < startFret + NUM_FRETS; fret++) {
-        const rowNotes = stringOrder.map(s => {
+    for (let fret = 1; fret <= maxFret; fret++) {
+        const rowNotes = strings.map(s => {
             const pos = shape.find(p => p.string === s);
-            if (pos?.fret === fret) {
-                return '<div class="note">&#9679;</div>'; // filled circle for finger
-            } else {
-                return '<div class="note">&nbsp;</div>';
-            }
+            return pos?.fret === fret
+                ? '<div class="note">&#9679;</div>' // filled circle
+                : '<div class="note">&nbsp;</div>';
         }).join('');
 
-        // Add fret number on the left only if startFret > 1
-        const fretLabel = startFret > 1 ? `<div class="fret-label">${fret}</div>` : '<div class="fret-label"></div>';
-
-        fretRows.push(`<div class="fret-row">${fretLabel}${rowNotes}</div>`);
+        fretRows.push(`<div class="fret-row"><div class="fret-label">${fret}</div>${rowNotes}</div>`);
     }
-
-    // For the top row, add empty label div for alignment
-    const topFretLabel = `<div class="fret-label">${startFret > 1 ? startFret + 'fr' : ''}</div>`;
 
     return `
     <div class="chord-diagram">
-      <div class="top-row">${topFretLabel}${topRow}</div>
-      ${fretRows.join('')}
+      <div class="top-row"><div class="fret-label"></div>${topRow}</div>
+      ${fretRows.join('\n')}
     </div>
   `;
 }
