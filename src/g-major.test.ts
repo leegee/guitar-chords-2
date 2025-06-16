@@ -7,7 +7,7 @@ import {
     type ConstraintProfile,
     type FingerPosition,
     type StringNumber,
-} from "./main";
+} from "./lib/chord-finder";
 
 const G: ChordSpec = {
     notes: new Set(["G", "B", "D"]),
@@ -37,7 +37,7 @@ const chromaticScale = [
     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
 ];
 
-function noteAt(stringNum: number, fret: number): string | null {
+export function noteAt(stringNum: number, fret: number): string | null {
     if (fret < 0) return null;
     const openNote = openStringNotes[stringNum as 6 | 5 | 4 | 3 | 2 | 1];
     const openIndex = chromaticScale.indexOf(openNote);
