@@ -89,8 +89,8 @@ test("Open G chord contains classic root-position shape", () => {
             if (fret !== expectedFret) return false;
         }
 
-        printChordDiagram(shape);
-        console.log("---");
+        // printChordDiagram(shape);
+        // console.log("---");
         return true;
     }
 
@@ -114,8 +114,7 @@ test("G as barred E", () => {
         1: 3,
     };
 
-    function matchesClassicG(shape: FingerPosition[]): boolean {
-        debugger;
+    function matchesBarredG(shape: FingerPosition[]): boolean {
         const shapeMap = new Map(shape.map(fp => [fp.string, fp.fret]));
 
         for (const stringNum of [6, 5, 4, 3, 2, 1]) {
@@ -126,11 +125,43 @@ test("G as barred E", () => {
             if (fret !== expectedFret) return false;
         }
 
-        printChordDiagram(shape);
-        console.log("---");
+        // printChordDiagram(shape);
+        // console.log("---");
         return true;
     }
 
-    const foundClassicShape = shapes.some(matchesClassicG);
+    const foundClassicShape = shapes.some(matchesBarredG);
     assert.ok(foundClassicShape, "G as barred E not found");
+});
+
+test("Muted shape [-1,5,5,4,3,3] does not appear", () => {
+    const shapes = generateCandidateShapes(G, constraints);
+
+    // Define the muted shape you want to exclude
+    const mutedShape: Record<number, number> = {
+        6: -1,
+        5: 5,
+        4: 5,
+        3: 4,
+        2: 3,
+        1: 3,
+    };
+
+    function matchesMutedShape(shape: FingerPosition[]): boolean {
+        const shapeMap = new Map(shape.map(fp => [fp.string, fp.fret]));
+        for (const stringNum of [6, 5, 4, 3, 2, 1]) {
+            const fret = shapeMap.get(stringNum as StringNumber);
+            if (fret === undefined) return false;
+            if (fret !== mutedShape[stringNum]) return false;
+        }
+        return true;
+    }
+
+    for (const shape of shapes) {
+        printChordDiagram(shape);
+    }
+    console.log("---");
+
+    const foundMutedShape = shapes.some(matchesMutedShape);
+    assert.ok(!foundMutedShape, "Muted shape [-1,5,5,4,3,3] should not be present");
 });
