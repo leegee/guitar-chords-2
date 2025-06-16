@@ -77,14 +77,26 @@ function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): 
   }
 
   for (const [_fret, strings] of fretMap.entries()) {
-    if (strings.length > 1) {
-      if (constraints.barOnlyAdjacentStrings) {
-        // Check if the fretted strings are contiguous
-        const sorted = strings.sort((a, b) => a - b);
-        for (let i = 1; i < sorted.length; i++) {
-          if (sorted[i] !== sorted[i - 1] + 1) {
-            return false; // non-contiguous → not a valid barre
-          }
+    if (strings.length >= 2) {
+      const sorted = strings.sort((a, b) => a - b);
+
+      // Count longest run of adjacent strings at this fret
+      let maxAdj = 1;
+      let currAdj = 1;
+
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i] === sorted[i - 1] + 1) {
+          currAdj++;
+          maxAdj = Math.max(maxAdj, currAdj);
+        } else {
+          currAdj = 1;
+        }
+      }
+
+      // Consider it a barre only if it spans > 2 adjacent strings
+      if (maxAdj >= 2) {
+        if (constraints.barOnlyAdjacentStrings && maxAdj !== sorted.length) {
+          return false;
         }
       }
     }
