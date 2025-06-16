@@ -59,8 +59,8 @@ test("G major chord candidate shapes generate and include root note", () => {
 
         assert.ok(notesInShape.has("G"), "Chord shape missing root note G");
 
-        printChordDiagram(shape);
-        console.log("\n");
+        // printChordDiagram(shape);
+        // console.log("\n");
     }
 });
 
@@ -97,4 +97,41 @@ test("Open G chord contains classic root-position shape", () => {
 
     const foundClassicShape = shapes.some(matchesClassicG);
     assert.ok(foundClassicShape, "Classic open G chord shape not found");
+});
+
+
+
+test("G as barred E", () => {
+    const shapes = generateCandidateShapes(G, constraints);
+
+    assert.ok(shapes.length > 0, "No chord shapes generated");
+
+    const classicGShape: Record<number, number> = {
+        6: 3,
+        5: 5,
+        4: 5,
+        3: 4,
+        2: 3,
+        1: 3,
+    };
+
+    function matchesClassicG(shape: FingerPosition[]): boolean {
+        debugger;
+        const shapeMap = new Map(shape.map(fp => [fp.string, fp.fret]));
+
+        for (const stringNum of [6, 5, 4, 3, 2, 1]) {
+            const fret = shapeMap.get(stringNum as StringNumber);
+            if (fret === undefined) return false;
+
+            const expectedFret = classicGShape[stringNum];
+            if (fret !== expectedFret) return false;
+        }
+
+        printChordDiagram(shape);
+        console.log("---");
+        return true;
+    }
+
+    const foundClassicShape = shapes.some(matchesClassicG);
+    assert.ok(foundClassicShape, "G as barred E not found");
 });
