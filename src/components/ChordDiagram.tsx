@@ -7,57 +7,49 @@ type ChordDiagramProps = {
 };
 
 export default function ChordDiagram(props: ChordDiagramProps) {
-  const PADDING_FRETS = 1; // Show one fret beyond max used
-
-  const stringCount = Math.max(...props.shape.map(p => p.string));
-
-  // Strings descending order (highest string number = lowest pitch string)
-  const stringOrder = Array.from({ length: stringCount }, (_, i) => stringCount - i);
+  const PADDING_FRETS = 1;
+  const stringOrder = [6, 5, 4, 3, 2, 1];
 
   const fretted = () => props.shape.filter(p => p.fret > 0).map(p => p.fret);
-  const minFret = () => (fretted().length > 0 ? Math.min(...fretted()) : 1);
-  const maxFretUsed = () => (fretted().length > 0 ? Math.max(...fretted()) : 1);
+  const minFret = () => Math.min(...fretted(), 1);
+  const maxFretUsed = () => Math.max(...fretted(), 1);
 
-  const startFret = () => (minFret() > 1 ? minFret() : 1);
+  const showNut = () => minFret() <= 4;
+  const startFret = () => (showNut() ? 1 : minFret());
   const numFrets = () => (maxFretUsed() - startFret() + 1) + PADDING_FRETS;
 
-  const findPos = (s: number) => props.shape.find(p => p.string === s);
+  const findPos = (s: number) =>
+    props.shape.find(p => p.string === s);
 
   return (
-    <section class="chord-diagram">
-      <div class="nut">
-        <div class="fret-label">
-          <Show when={startFret() > 1}>{startFret()}fr</Show>
+    <section class={`chord-diagram fret-${startFret()}`}>
+      <Show when={showNut()}>
+        <div class="nut">
+          <div class="fret-label"></div>
+          <For each={stringOrder}>
+            {(s) => {
+              const pos = findPos(s);
+              return (
+                <div class="marker">
+                  <Show when={pos} fallback="?">
+                    {pos!.fret === -1 ? "x" : pos!.fret === 0 ? "o" : ""}
+                  </Show>
+                </div>
+              );
+            }}
+          </For>
         </div>
-        <For each={stringOrder}>
-          {(s) => {
-            const pos = findPos(s);
-            return (
-              <div class="marker">
-                <Show when={pos} fallback="?">
-                  {pos!.fret === -1 ? (
-                    "x"
-                  ) : pos!.fret === 0 ? (
-                    "o"
-                  ) : (
-                    ""
-                  )}
-                </Show>
-              </div>
-            );
-          }}
-        </For>
-      </div>
+      </Show>
 
       {/* Fret Rows */}
       <For each={Array.from({ length: numFrets() }, (_, i) => startFret() + i)}>
         {(fret) => {
           const fretMod = fret % 12;
-          const showFretNum = [0, 3, 5, 7, 9].includes(fretMod);
+          const showFretNum = [3, 5, 7, 9, 0].includes(fretMod);
           return (
             <div class="fret-row">
               <div class="fret-label">
-                <Show when={showFretNum}>{fret}</Show>
+                <Show when={showFretNum || !showNut()}>{fret}</Show>
               </div>
               <For each={stringOrder}>
                 {(s) => {
@@ -71,7 +63,7 @@ export default function ChordDiagram(props: ChordDiagramProps) {
                 }}
               </For>
             </div>
-          )
+          );
         }}
       </For>
     </section>

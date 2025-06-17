@@ -1,31 +1,19 @@
 import './App.scss';
 import { createSignal } from 'solid-js';
-import { type ConstraintProfile, generateCandidateShapes, type StringNumber } from './lib/chord-finder';
+import {
+    type ConstraintProfile,
+    generateCandidateShapes,
+} from './lib/chord-finder';
 import ChordDiagram from './components/ChordDiagram';
 import ChordControls from './components/ChordControls';
-import { chordTypeLabels, chromaticScale, getChordNotes, chordFormulas } from './lib/notes';
-
-const tuning7: Record<StringNumber, string> = {
-    7: "B",
-    6: "E",
-    5: "A",
-    4: "D",
-    3: "G",
-    2: "B",
-    1: "E",
-};
-
-const constraints: ConstraintProfile = {
-    maxFingers: 4,
-    maxFretSpan: 4,
-    allowBarres: true,
-    allowOpenStrings: true,
-    allowMutedStrings: true,
-    requireRootInBass: false,
-    tuning: tuning7,
-};
-
-const chordTypes = Object.keys(chordFormulas);
+import TuningSelector from './components/TuningSelector';
+import { tuningOptions } from './lib/tunings';
+import {
+    chordTypeLabels,
+    chromaticScale,
+    getChordNotes,
+    chordFormulas
+} from './lib/notes';
 
 export interface ChordSpec {
     rootNote: string;
@@ -35,6 +23,9 @@ export interface ChordSpec {
 export default function App() {
     const [rootNote, setRootNote] = createSignal("G");
     const [chordType, setChordType] = createSignal("major");
+    const [tuning, setTuning] = createSignal(tuningOptions[0].tuning);
+
+    const chordTypes = Object.keys(chordFormulas);
 
     const chordSpec = (): ChordSpec => {
         const root = rootNote();
@@ -43,11 +34,27 @@ export default function App() {
         return { rootNote: root, notes };
     };
 
-    const chordShapes = () => generateCandidateShapes(chordSpec(), constraints);
+    const constraints = (): ConstraintProfile => ({
+        maxFingers: 4,
+        maxFretSpan: 4,
+        allowBarres: true,
+        allowOpenStrings: true,
+        allowMutedStrings: true,
+        requireRootInBass: false,
+        tuning: tuning(),
+    });
+
+    const chordShapes = () => generateCandidateShapes(chordSpec(), constraints());
 
     return (
         <main>
             <h1>Chord Shapes</h1>
+
+            <TuningSelector
+                options={tuningOptions}
+                selected={tuning()}
+                onChange={setTuning}
+            />
 
             <ChordControls
                 rootNote={rootNote()}
