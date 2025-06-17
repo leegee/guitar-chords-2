@@ -1,9 +1,9 @@
+import './App.scss';
 import { createSignal } from 'solid-js';
 import { type ConstraintProfile, generateCandidateShapes } from './lib/chord-finder';
 import ChordDiagram from './components/ChordDiagram';
-import ChordControls from './ChordControls';
-import './style.css';
-import { chromaticScale, getMajorChordNotes, getMinorChordNotes } from './lib/notes';
+import ChordControls from './components/ChordControls';
+import { chordTypeLabels, chromaticScale, getChordNotes, chordFormulas } from './lib/notes';
 
 const constraints: ConstraintProfile = {
     maxFingers: 4,
@@ -14,7 +14,7 @@ const constraints: ConstraintProfile = {
     requireRootInBass: false,
 };
 
-const chordTypes = ["major", "minor"];
+const chordTypes = Object.keys(chordFormulas);
 
 export interface ChordSpec {
     rootNote: string;
@@ -28,16 +28,7 @@ export default function App() {
     const chordSpec = (): ChordSpec => {
         const root = rootNote();
         const type = chordType();
-
-        let notes: Set<string>;
-        if (type === "major") {
-            notes = getMajorChordNotes(root);
-        } else if (type === "minor") {
-            notes = getMinorChordNotes(root);
-        } else {
-            throw new Error(`Unknown chord type, ${type}`);
-        }
-
+        const notes = getChordNotes(root, type);
         return { rootNote: root, notes };
     };
 
@@ -54,6 +45,7 @@ export default function App() {
                 setChordType={setChordType}
                 rootOptions={chromaticScale}
                 chordTypeOptions={chordTypes}
+                chordTypeLabels={chordTypeLabels}
             />
 
             <section class="chord-diagrams">

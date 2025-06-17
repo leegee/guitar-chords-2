@@ -1,3 +1,4 @@
+import './ChordDiagram.scss';
 import { For, Show } from "solid-js";
 import type { FingerPosition } from "../lib/chord-finder";
 

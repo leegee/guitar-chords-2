@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "babel-preset-solid": "^1.9.6",
+    "sass": "^1.89.2",
     "tsx": "^4.20.3",
     "vite": "^6.3.5",
     "vite-plugin-solid": "^2.11.6"

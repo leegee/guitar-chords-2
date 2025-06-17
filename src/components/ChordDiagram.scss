@@ -1,0 +1,54 @@
+.chord-diagram {
+    display: inline-block;
+    font-family: monospace;
+    user-select: none;
+    background-color: #1e1e1e;
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+    color: #ddd;
+
+    .nut,
+    .fret-row {
+        display: flex;
+        align-items: center;
+    }
+
+    .fret-label {
+        width: 2em;
+        text-align: right;
+        padding-right: 6px;
+        font-size: 0.75em;
+        color: #aaa;
+        font-weight: 600;
+        user-select: none;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .marker,
+    .note {
+        width: 1.8em;
+        height: 1.8em;
+        line-height: 1.8em;
+        text-align: center;
+        border: 1px solid #444;
+        box-sizing: border-box;
+        margin-right: 2px;
+        font-weight: bold;
+        border-radius: 3px;
+        transition: background-color 0.3s ease;
+        cursor: default;
+        user-select: none;
+    }
+
+    .marker {
+        background: #333;
+        color: #bbb;
+    }
+
+    .note {
+        background: #444;
+        color: #1abc9c;
+        box-shadow: 0 0 6px #1abc9caa;
+    }
+}
