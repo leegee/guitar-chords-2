@@ -86,7 +86,7 @@ button:focus-visible {
   color: #ddd;
 }
 
-.top-row,
+.nut,
 .fret-row {
   display: flex;
   align-items: center;
