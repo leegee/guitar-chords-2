@@ -1,6 +1,7 @@
 import './App.scss';
 import { createSignal } from 'solid-js';
 import {
+    type ChordSpec,
     type ConstraintProfile,
     generateCandidateShapes,
 } from './lib/chord-finder';
@@ -14,11 +15,6 @@ import {
     getChordNotes,
     chordFormulas
 } from './lib/notes';
-
-export interface ChordSpec {
-    rootNote: string;
-    notes: Set<string>;
-}
 
 export default function App() {
     const [rootNote, setRootNote] = createSignal("G");
