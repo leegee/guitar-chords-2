@@ -83,13 +83,12 @@ function fretSpan(shape: FingerPosition[]): number {
 
 /*
 function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): boolean {
-  if (!constraints.allowBarres) return true;
+  if (!constraints.allowBarres) return false; // no barres allowed, so fail if any exist
 
   const fretMap = new Map<number, number[]>();
 
   for (const pos of shape) {
-    if (pos.fret <= 0) continue;
-
+    if (pos.fret <= 0) continue; // skip open (0) and muted (-1)
     if (!fretMap.has(pos.fret)) {
       fretMap.set(pos.fret, []);
     }
@@ -97,15 +96,22 @@ function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): 
   }
 
   for (const [_fret, strings] of fretMap.entries()) {
-    if (strings.length >= 2) {
-      const sorted = strings.slice().sort((a, b) => a - b);
-      // ...er
+    if (strings.length < 2) continue; // barre needs at least 2 strings
+
+    const sorted = strings.slice().sort((a, b) => a - b);
+
+    // Check if strings form a contiguous sequence (e.g. 2,3,4,5 is good; 2,4,5 is bad)
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] !== sorted[i - 1] + 1) {
+        // Non-contiguous strings fretted on same fret -> invalid barre
+        return false;
+      }
     }
   }
 
-  return true;
+  return true; // all barres valid
 }
-*/
+  */
 
 function rootInBass(shape: FingerPosition[], chordSpec: ChordSpec, tuning: Record<StringNumber, string>): boolean {
   // Sort by string descending (lowest pitch string has highest string number)
@@ -128,9 +134,23 @@ function shapeCoversNotes(shape: FingerPosition[], chordSpec: ChordSpec, tuning:
   return true;
 }
 
+function isStretchImpractical(shape: FingerPosition[]): boolean {
+  const frets = shape.filter(pos => pos.fret > 0).map(pos => pos.fret);
+  const strings = shape.filter(pos => pos.fret > 0).map(pos => pos.string);
+
+  if (frets.length <= 3) return false;
+
+  const span = Math.max(...frets) - Math.min(...frets);
+  const stringSpan = Math.max(...strings) - Math.min(...strings);
+
+  // flag 5+ fret span across all 6 strings
+  return span >= 5 && stringSpan >= 5;
+}
+
 function violatesConstraints(shape: FingerPosition[], constraints: ConstraintProfile): boolean {
   if (countFingers(shape) > constraints.maxFingers) return true;
   if (fretSpan(shape) > constraints.maxFretSpan) return true;
+  if (isStretchImpractical(shape)) return true;
   // if (!barreIsValid(shape, constraints)) return true;
   return false;
 }
