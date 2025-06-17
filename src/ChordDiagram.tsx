@@ -6,12 +6,15 @@ type ChordDiagramProps = {
 };
 
 export default function ChordDiagram(props: ChordDiagramProps) {
-  const NUM_FRETS = 5;
+  const PADDING_FRETS = 1; // Show one fret beyond max used
   const stringOrder = [6, 5, 4, 3, 2, 1];
 
   const fretted = () => props.shape.filter(p => p.fret > 0).map(p => p.fret);
   const minFret = () => Math.min(...fretted(), 1);
+  const maxFretUsed = () => Math.max(...fretted(), 1);
+
   const startFret = () => (minFret() > 1 ? minFret() : 1);
+  const numFrets = () => (maxFretUsed() - startFret() + 1) + PADDING_FRETS;
 
   const findPos = (s: number) =>
     props.shape.find(p => p.string === s);
@@ -25,10 +28,9 @@ export default function ChordDiagram(props: ChordDiagramProps) {
         <For each={stringOrder}>
           {(s) => {
             const pos = findPos(s);
-            console.log('pos', pos)
             return (
               <div class="marker">
-                <Show when={pos} fallback="">
+                <Show when={pos} fallback="?">
                   {pos!.fret === -1 ? (
                     "x"
                   ) : pos!.fret === 0 ? (
@@ -44,7 +46,7 @@ export default function ChordDiagram(props: ChordDiagramProps) {
       </div>
 
       {/* Fret Rows */}
-      <For each={Array.from({ length: NUM_FRETS }, (_, i) => startFret() + i)}>
+      <For each={Array.from({ length: numFrets() }, (_, i) => startFret() + i)}>
         {(fret) => (
           <div class="fret-row">
             <div class="fret-label">
