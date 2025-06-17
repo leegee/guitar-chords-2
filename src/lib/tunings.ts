@@ -16,6 +16,29 @@ export const tuningOptions: TuningOption[] = [
         },
     },
     {
+        label: "Guitar Baritone",
+        tuning: {
+            6: "B",
+            5: "E",
+            4: "A",
+            3: "D",
+            2: "G",
+            1: "B",
+        },
+    },
+    {
+        label: "Guitar Standard 7-string",
+        tuning: {
+            7: "B",
+            6: "E",
+            5: "A",
+            4: "D",
+            3: "G",
+            2: "B",
+            1: "E",
+        },
+    },
+    {
         label: "Guitar Drop D",
         tuning: {
             6: "D",
@@ -109,18 +132,6 @@ export const tuningOptions: TuningOption[] = [
             3: "G",
             2: "C",
             1: "D",
-        },
-    },
-    {
-        label: "Guitar Standard 7-string BEADGBE",
-        tuning: {
-            7: "B",
-            6: "E",
-            5: "A",
-            4: "D",
-            3: "G",
-            2: "B",
-            1: "E",
         },
     },
 ];
