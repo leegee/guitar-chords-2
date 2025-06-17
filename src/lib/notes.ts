@@ -77,10 +77,3 @@ export function getChordNotes(root: string, type: string): Set<string> {
     return new Set(notes);
 }
 
-export function getMajorChordNotes(root: string): Set<string> {
-    return getChordNotes(root, "major");
-}
-
-export function getMinorChordNotes(root: string): Set<string> {
-    return getChordNotes(root, "minor");
-}
