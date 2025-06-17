@@ -31,7 +31,7 @@ export default function ChordDiagram(props: ChordDiagramProps) {
               const pos = findPos(s);
               return (
                 <div class="marker">
-                  <Show when={pos} fallback="?">
+                  <Show when={pos} fallback="x">
                     {pos!.fret === -1 ? "x" : pos!.fret === 0 ? "o" : ""}
                   </Show>
                 </div>
