@@ -1,9 +1,19 @@
 import './App.scss';
 import { createSignal } from 'solid-js';
-import { type ConstraintProfile, generateCandidateShapes } from './lib/chord-finder';
+import { type ConstraintProfile, generateCandidateShapes, type StringNumber } from './lib/chord-finder';
 import ChordDiagram from './components/ChordDiagram';
 import ChordControls from './components/ChordControls';
 import { chordTypeLabels, chromaticScale, getChordNotes, chordFormulas } from './lib/notes';
+
+const tuning7: Record<StringNumber, string> = {
+    7: "B",
+    6: "E",
+    5: "A",
+    4: "D",
+    3: "G",
+    2: "B",
+    1: "E",
+};
 
 const constraints: ConstraintProfile = {
     maxFingers: 4,
@@ -12,6 +22,7 @@ const constraints: ConstraintProfile = {
     allowOpenStrings: true,
     allowMutedStrings: true,
     requireRootInBass: false,
+    tuning: tuning7,
 };
 
 const chordTypes = Object.keys(chordFormulas);

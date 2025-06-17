@@ -1,6 +1,6 @@
 import { chromaticScale } from "./notes";
 
-export type StringNumber = 1 | 2 | 3 | 4 | 5 | 6;
+export type StringNumber = number;
 type FretNumber = number; // 0 = open, -1 = muted
 
 export interface ChordSpec {
@@ -10,7 +10,7 @@ export interface ChordSpec {
 
 export interface FingerPosition {
   string: StringNumber;
-  fret: FretNumber; // -1 for muted
+  fret: FretNumber;
   finger?: number;
 }
 
@@ -21,32 +21,30 @@ export interface ConstraintProfile {
   allowOpenStrings: boolean;
   allowMutedStrings: boolean;
   requireRootInBass: boolean;
+  tuning: Record<StringNumber, string>; // tuning per string number
+}
+
+function getStringCount(tuning: Record<StringNumber, string>): number {
+  return Object.keys(tuning).length;
 }
 
 const FIXED_MAX_FRET = 7;
 
-// Standard tuning notes on open strings, low E=string 6
-const openStringNotes: Record<StringNumber, string> = {
-  6: "E",
-  5: "A",
-  4: "D",
-  3: "G",
-  2: "B",
-  1: "E",
-};
-
-function noteAt(stringNum: StringNumber, fret: FretNumber): string | null {
+function noteAt(
+  stringNum: StringNumber,
+  fret: FretNumber,
+  tuning: Record<StringNumber, string>
+): string | null {
   if (fret < 0) return null; // muted string, no note
-  const openNote = openStringNotes[stringNum];
+  const openNote = tuning[stringNum];
+  if (!openNote) return null;
   const openIndex = chromaticScale.indexOf(openNote);
   if (openIndex === -1) return null;
   const noteIndex = (openIndex + fret) % chromaticScale.length;
   return chromaticScale[noteIndex];
 }
 
-
 function countFingers(shape: FingerPosition[]): number {
-  // Map frets to array of strings fretted on that fret
   const fretToStrings = new Map<number, number[]>();
 
   for (const pos of shape) {
@@ -60,44 +58,37 @@ function countFingers(shape: FingerPosition[]): number {
 
   let fingerCount = 0;
 
-  // Barre: For each fret, count groups of adjacent strings as 1 finger each
   for (const [_fret, strings] of fretToStrings.entries()) {
-    const sortedStrings = strings.sort((a, b) => a - b);
+    const sortedStrings = strings.slice().sort((a, b) => a - b);
 
     for (let i = 1; i < sortedStrings.length; i++) {
       if (sortedStrings[i] === sortedStrings[i - 1] + 1) {
-        // Adjacent string
         continue;
       } else {
-        // Non-adjacent string
         fingerCount += 1;
       }
     }
 
-    // Count finger for the last run in this fret group
     fingerCount += 1;
   }
 
   return fingerCount;
 }
 
-
 function fretSpan(shape: FingerPosition[]): number {
-  const frets = shape
-    .filter(pos => pos.fret > 0)
-    .map(pos => pos.fret);
+  const frets = shape.filter(pos => pos.fret > 0).map(pos => pos.fret);
   if (frets.length === 0) return 0;
   return Math.max(...frets) - Math.min(...frets);
 }
 
+/*
 function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): boolean {
   if (!constraints.allowBarres) return true;
 
-  // Map frets to list of strings fretted at that fret
   const fretMap = new Map<number, number[]>();
 
   for (const pos of shape) {
-    if (pos.fret <= 0) continue; // Skip muted (-1) and open (0) strings
+    if (pos.fret <= 0) continue;
 
     if (!fretMap.has(pos.fret)) {
       fretMap.set(pos.fret, []);
@@ -107,44 +98,28 @@ function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): 
 
   for (const [_fret, strings] of fretMap.entries()) {
     if (strings.length >= 2) {
-      const sorted = strings.sort((a, b) => a - b);
-
-      // Count longest run of adjacent strings at this fret
-      let maxAdj = 1;
-      let currAdj = 1;
-
-      for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i] === sorted[i - 1] + 1) {
-          currAdj++;
-          maxAdj = Math.max(maxAdj, currAdj);
-        } else {
-          currAdj = 1;
-        }
-      }
-
+      const sorted = strings.slice().sort((a, b) => a - b);
+      // ...er
     }
   }
 
-  return true; // no invalid barres found
+  return true;
 }
+*/
 
-
-function rootInBass(shape: FingerPosition[], chordSpec: ChordSpec): boolean {
-  // Sort by string descending (6 to 1)
-  const played = shape
-    .filter(pos => pos.fret >= 0)
-    .sort((a, b) => b.string - a.string);
+function rootInBass(shape: FingerPosition[], chordSpec: ChordSpec, tuning: Record<StringNumber, string>): boolean {
+  // Sort by string descending (lowest pitch string has highest string number)
+  const played = shape.filter(pos => pos.fret >= 0).sort((a, b) => b.string - a.string);
   if (played.length === 0) return false;
-  const lowestNote = noteAt(played[0].string, played[0].fret);
+  const lowestNote = noteAt(played[0].string, played[0].fret, tuning);
   return lowestNote === chordSpec.rootNote;
 }
 
-// Check if shape covers all required chord notes
-function shapeCoversNotes(shape: FingerPosition[], chordSpec: ChordSpec): boolean {
+function shapeCoversNotes(shape: FingerPosition[], chordSpec: ChordSpec, tuning: Record<StringNumber, string>): boolean {
   const notesInShape = new Set<string>();
   for (const pos of shape) {
     if (pos.fret < 0) continue;
-    const note = noteAt(pos.string, pos.fret);
+    const note = noteAt(pos.string, pos.fret, tuning);
     if (note) notesInShape.add(note);
   }
   for (const note of chordSpec.notes) {
@@ -153,11 +128,10 @@ function shapeCoversNotes(shape: FingerPosition[], chordSpec: ChordSpec): boolea
   return true;
 }
 
-// Check if shape violates constraints (partial shape)
 function violatesConstraints(shape: FingerPosition[], constraints: ConstraintProfile): boolean {
   if (countFingers(shape) > constraints.maxFingers) return true;
   if (fretSpan(shape) > constraints.maxFretSpan) return true;
-  if (!barreIsValid(shape, constraints)) return true;
+  // if (!barreIsValid(shape, constraints)) return true;
   return false;
 }
 
@@ -165,38 +139,35 @@ function countPlayedStrings(shape: FingerPosition[]): number {
   return shape.filter(pos => pos.fret !== -1).length;
 }
 
+function normalize(shape: FingerPosition[], stringCount: number): FingerPosition[] {
+  const map = new Map<number, FingerPosition>();
+  for (const pos of shape) {
+    map.set(pos.string, pos);
+  }
+  const fullShape: FingerPosition[] = [];
+  for (let s = stringCount; s >= 1; s--) {
+    if (map.has(s)) {
+      fullShape.push(map.get(s)!);
+    } else {
+      fullShape.push({ string: s as StringNumber, fret: -1 });
+    }
+  }
+  return fullShape;
+}
+
 export function isSuperset(
   superset: FingerPosition[],
-  subset: FingerPosition[]
+  subset: FingerPosition[],
+  tuning: Record<StringNumber, string>
 ): boolean {
-  const sup = superset.slice().sort((a, b) => b.string - a.string);
-  const sub = subset.slice().sort((a, b) => b.string - a.string);
+  const stringCount = getStringCount(tuning);
+  const supNorm = normalize(superset, stringCount);
+  const subNorm = normalize(subset, stringCount);
 
-  // Both should have length 6, if not pad missing strings as muted (-1)
-  function normalize(shape: FingerPosition[]): FingerPosition[] {
-    const map = new Map<number, FingerPosition>();
-    for (const pos of shape) {
-      map.set(pos.string, pos);
-    }
-    const fullShape: FingerPosition[] = [];
-    for (let s = 6; s >= 1; s--) {
-      if (map.has(s)) {
-        fullShape.push(map.get(s)!);
-      } else {
-        fullShape.push({ string: s as StringNumber, fret: -1 }); // muted by default if missing
-      }
-    }
-    return fullShape;
-  }
-
-  const supNorm = normalize(sup);
-  const subNorm = normalize(sub);
-
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < stringCount; i++) {
     const supFret = supNorm[i].fret;
     const subFret = subNorm[i].fret;
 
-    // If subset has string muted or fretted, superset must match exactly
     if (subFret !== -1) {
       if (supFret === -1 || supFret !== subFret) {
         return false;
@@ -206,14 +177,13 @@ export function isSuperset(
   return true;
 }
 
-function removeMutedSubsets(shapes: FingerPosition[][]): FingerPosition[][] {
+function removeMutedSubsets(shapes: FingerPosition[][], tuning: Record<StringNumber, string>): FingerPosition[][] {
   const sorted = [...shapes].sort((a, b) => countPlayedStrings(b) - countPlayedStrings(a));
 
   const result: FingerPosition[][] = [];
 
   for (const shape of sorted) {
-    const isRedundant = result.some(existing => isSuperset(existing, shape));
-
+    const isRedundant = result.some(existing => isSuperset(existing, shape, tuning));
     if (!isRedundant) {
       result.push(shape);
     }
@@ -222,21 +192,26 @@ function removeMutedSubsets(shapes: FingerPosition[][]): FingerPosition[][] {
   return result;
 }
 
-
 export function generateCandidateShapes(
   chordSpec: ChordSpec,
-  constraints: ConstraintProfile,
+  constraints: ConstraintProfile
 ): FingerPosition[][] {
   const results: FingerPosition[][] = [];
-  const strings: StringNumber[] = [6, 5, 4, 3, 2, 1];
+  const { tuning } = constraints;
+  const stringCount = getStringCount(tuning);
+
+  // Strings descending
+  const strings: StringNumber[] = Array.from(
+    { length: stringCount },
+    (_, i) => stringCount - i
+  );
 
   function recurse(stringIndex: number, currentShape: FingerPosition[]) {
     if (stringIndex === strings.length) {
-      // All strings assigned, check full constraints
       if (
         !violatesConstraints(currentShape, constraints) &&
-        shapeCoversNotes(currentShape, chordSpec) &&
-        (!constraints.requireRootInBass || rootInBass(currentShape, chordSpec))
+        shapeCoversNotes(currentShape, chordSpec, tuning) &&
+        (!constraints.requireRootInBass || rootInBass(currentShape, chordSpec, tuning))
       ) {
         results.push([...currentShape]);
       }
@@ -245,18 +220,17 @@ export function generateCandidateShapes(
 
     const stringNum = strings[stringIndex];
 
-    // Get possible frets for this string under chordSpec and constraints
     const possibleFrets: FretNumber[] = [];
 
     for (let fret = 0; fret <= FIXED_MAX_FRET; fret++) {
-      const note = noteAt(stringNum, fret);
+      const note = noteAt(stringNum, fret, tuning);
       if (note && chordSpec.notes.has(note)) {
         possibleFrets.push(fret);
       }
     }
 
     if (constraints.allowMutedStrings) {
-      possibleFrets.push(-1); // muted
+      possibleFrets.push(-1);
     }
 
     for (const fret of possibleFrets) {
@@ -269,19 +243,16 @@ export function generateCandidateShapes(
 
   recurse(0, []);
 
-  // Filter duplicates by generating a unique key string from each shape
+  // Filter duplicates by normalized shape key
   const uniqueMap = new Map<string, FingerPosition[]>();
+
   for (const shape of results) {
-    // Sort shape by string descending (6 to 1)
-    const sorted = shape.slice().sort((a, b) => b.string - a.string);
-    const key = sorted.map(pos => pos.fret).join(",");
+    const norm = normalize(shape, stringCount);
+    const key = norm.map(pos => `${pos.string}:${pos.fret}`).join(",");
     if (!uniqueMap.has(key)) {
-      uniqueMap.set(key, shape);
+      uniqueMap.set(key, norm);
     }
   }
 
-  const uniqueArray = Array.from(uniqueMap.values());
-  return removeMutedSubsets(uniqueArray);
+  return removeMutedSubsets(Array.from(uniqueMap.values()), tuning);
 }
-
-

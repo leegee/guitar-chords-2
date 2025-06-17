@@ -15,6 +15,16 @@ const G: ChordSpec = {
     rootNote: "G",
 };
 
+const tuning7: Record<StringNumber, string> = {
+    7: "B",
+    6: "E",
+    5: "A",
+    4: "D",
+    3: "G",
+    2: "B",
+    1: "E",
+};
+
 const constraints: ConstraintProfile = {
     maxFingers: 4,
     maxFretSpan: 4,
@@ -22,9 +32,12 @@ const constraints: ConstraintProfile = {
     allowOpenStrings: true,
     allowMutedStrings: true,
     requireRootInBass: false,
+    tuning: tuning7,
 };
 
+// Added string 7 here for consistency with tuning7
 const openStringNotes: Record<number, string> = {
+    7: "B",
     6: "E",
     5: "A",
     4: "D",
@@ -35,7 +48,8 @@ const openStringNotes: Record<number, string> = {
 
 export function noteAt(stringNum: number, fret: number): string | null {
     if (fret < 0) return null;
-    const openNote = openStringNotes[stringNum as 6 | 5 | 4 | 3 | 2 | 1];
+    const openNote = openStringNotes[stringNum];
+    if (!openNote) return null;
     const openIndex = chromaticScale.indexOf(openNote);
     if (openIndex === -1) return null;
     return chromaticScale[(openIndex + fret) % chromaticScale.length];
@@ -75,7 +89,6 @@ test("Open G chord contains classic root-position shape", () => {
     };
 
     function matchesClassicG(shape: FingerPosition[]): boolean {
-        debugger;
         const shapeMap = new Map(shape.map(fp => [fp.string, fp.fret]));
 
         for (const stringNum of [6, 5, 4, 3, 2, 1]) {
@@ -94,8 +107,6 @@ test("Open G chord contains classic root-position shape", () => {
     const foundClassicShape = shapes.some(matchesClassicG);
     assert.ok(foundClassicShape, "Classic open G chord shape not found");
 });
-
-
 
 test("G as barred E", () => {
     const shapes = generateCandidateShapes(G, constraints);
