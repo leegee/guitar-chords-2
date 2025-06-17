@@ -9,6 +9,7 @@ export interface ChordSpec {
 export interface FingerPosition {
   string: StringNumber;
   fret: FretNumber; // -1 for muted
+  finger?: number;
 }
 
 export interface ConstraintProfile {
@@ -117,7 +118,6 @@ function barreIsValid(shape: FingerPosition[], constraints: ConstraintProfile): 
 }
 
 
-// Check if root is in bass (lowest played string)
 function rootInBass(shape: FingerPosition[], chordSpec: ChordSpec): boolean {
   // Sort by string descending (6 to 1)
   const played = shape
@@ -142,14 +142,13 @@ function shapeCoversNotes(shape: FingerPosition[], chordSpec: ChordSpec): boolea
   return true;
 }
 
-// Check if shape violates constraints early (partial shape)
+// Check if shape violates constraints (partial shape)
 function violatesConstraints(shape: FingerPosition[], constraints: ConstraintProfile): boolean {
   if (countFingers(shape) > constraints.maxFingers) return true;
   if (fretSpan(shape) > constraints.maxFretSpan) return true;
   if (!barreIsValid(shape, constraints)) return true;
   return false;
 }
-
 
 function countPlayedStrings(shape: FingerPosition[]): number {
   return shape.filter(pos => pos.fret !== -1).length;
@@ -159,7 +158,6 @@ export function isSuperset(
   superset: FingerPosition[],
   subset: FingerPosition[]
 ): boolean {
-  // Sort both shapes by string descending (6 to 1)
   const sup = superset.slice().sort((a, b) => b.string - a.string);
   const sub = subset.slice().sort((a, b) => b.string - a.string);
 
@@ -198,24 +196,14 @@ export function isSuperset(
 }
 
 function removeMutedSubsets(shapes: FingerPosition[][]): FingerPosition[][] {
-  const sorted = [...shapes].sort((a, b) =>
-    countPlayedStrings(b) - countPlayedStrings(a)
-  );
+  const sorted = [...shapes].sort((a, b) => countPlayedStrings(b) - countPlayedStrings(a));
 
   const result: FingerPosition[][] = [];
 
   for (const shape of sorted) {
-    // console.log("Checking shape:", shape.map(p => p.fret));
-    const isRedundant = result.some(existing => {
-      const res = isSuperset(existing, shape);
-      // if (res) {
-      //   console.log("  Redundant because superset exists:", existing.map(p => p.fret));
-      // }
-      return res;
-    });
+    const isRedundant = result.some(existing => isSuperset(existing, shape));
 
     if (!isRedundant) {
-      // console.log("  Adding shape:", shape.map(p => p.fret));
       result.push(shape);
     }
   }
@@ -249,8 +237,6 @@ export function generateCandidateShapes(
     // Get possible frets for this string under chordSpec and constraints
     const possibleFrets: FretNumber[] = [];
 
-    // const maxFretToCheck = constraints.maxFretSpan + 2;
-
     for (let fret = 0; fret <= FIXED_MAX_FRET; fret++) {
       const note = noteAt(stringNum, fret);
       if (note && chordSpec.notes.has(note)) {
@@ -272,7 +258,7 @@ export function generateCandidateShapes(
 
   recurse(0, []);
 
-  // Filter duplicates by generating a key string from each shape
+  // Filter duplicates by generating a unique key string from each shape
   const uniqueMap = new Map<string, FingerPosition[]>();
   for (const shape of results) {
     // Sort shape by string descending (6 to 1)
@@ -282,7 +268,6 @@ export function generateCandidateShapes(
       uniqueMap.set(key, shape);
     }
   }
-
 
   const uniqueArray = Array.from(uniqueMap.values());
   return removeMutedSubsets(uniqueArray);
