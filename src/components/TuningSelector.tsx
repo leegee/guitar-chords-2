@@ -31,6 +31,17 @@ export default function TuningSelector(props: Props) {
                     )}
                 </For>
             </select>
+
+            <div class="selected-tuning">
+                <For each={Object.entries(props.selected).sort((a, b) => Number(b[0]) - Number(a[0]))}>
+                    {([, note]) => (
+                        <span class='string'>
+                            {note}
+                        </span>
+                    )}
+                </For>
+            </div>
+
         </section>
     );
 }

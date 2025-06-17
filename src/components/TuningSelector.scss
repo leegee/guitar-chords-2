@@ -4,5 +4,13 @@
         padding: 0.3em;
     }
 
+    .selected-tuning {
+        margin: 1em 0;
+
+        .string {
+            margin: 0 0.3em;
+        }
+    }
+
     margin-bottom: 10pt;
 }

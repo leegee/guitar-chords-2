@@ -5,7 +5,7 @@ export type TuningOption = {
 
 export const tuningOptions: TuningOption[] = [
     {
-        label: "Standard 6-string EADGBE",
+        label: "Guitar Standard 6-string",
         tuning: {
             6: "E",
             5: "A",
@@ -16,12 +16,23 @@ export const tuningOptions: TuningOption[] = [
         },
     },
     {
-        label: "Drop D (DADGBE)",
+        label: "Guitar Drop D",
         tuning: {
             6: "D",
             5: "A",
             4: "D",
             3: "G",
+            2: "B",
+            1: "E",
+        },
+    },
+    {
+        label: "Guitar Flamenco D6/9",
+        tuning: {
+            6: "D",
+            5: "A",
+            4: "D",
+            3: "F♯",
             2: "B",
             1: "E",
         },
