@@ -1,14 +1,14 @@
 import assert from "node:assert";
 import test from "node:test";
-import { printChordDiagram } from "./lib/print-chord-diagram";
+import { printChordDiagram } from "../src/lib/print-chord-diagram";
 import {
     generateCandidateShapes,
     type ChordSpec,
     type ConstraintProfile,
     type FingerPosition,
     type StringNumber,
-} from "./lib/chord-finder";
-import { chromaticScale } from "./lib/notes";
+} from "../src/lib/chord-finder";
+import { chromaticScale } from "../src/lib/notes";
 
 const G: ChordSpec = {
     notes: new Set(["G", "B", "D"]),

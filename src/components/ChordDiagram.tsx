@@ -1,5 +1,5 @@
 import { For, Show } from "solid-js";
-import type { FingerPosition } from "./lib/chord-finder";
+import type { FingerPosition } from "../lib/chord-finder";
 
 type ChordDiagramProps = {
   shape: FingerPosition[];

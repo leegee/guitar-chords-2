@@ -3,7 +3,7 @@ import test from "node:test";
 import {
     isSuperset,
     type FingerPosition,
-} from "./lib/chord-finder";
+} from "../src/lib/chord-finder";
 
 const shapeA: FingerPosition[] = [
     { string: 6, fret: -1 },

@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 import { type ConstraintProfile, generateCandidateShapes } from './lib/chord-finder';
-import ChordDiagram from './ChordDiagram';
+import ChordDiagram from './components/ChordDiagram';
 import RootSelector from './RootSelector';
 import './style.css';
 import { chromaticScale, getMajorChordNotes } from './lib/notes';
