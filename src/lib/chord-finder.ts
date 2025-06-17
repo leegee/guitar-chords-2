@@ -47,29 +47,47 @@ function noteAt(stringNum: StringNumber, fret: FretNumber): string | null {
   return chromaticScale[noteIndex];
 }
 
+
 function countFingers(shape: FingerPosition[]): number {
-  const fretToStrings = new Map<number, Set<StringNumber>>();
+  // Map frets to array of strings fretted on that fret
+  const fretToStrings = new Map<number, number[]>();
 
   for (const pos of shape) {
     if (pos.fret > 0) {
       if (!fretToStrings.has(pos.fret)) {
-        fretToStrings.set(pos.fret, new Set());
+        fretToStrings.set(pos.fret, []);
       }
-      fretToStrings.get(pos.fret)!.add(pos.string);
+      fretToStrings.get(pos.fret)!.push(pos.string);
     }
   }
 
   let fingerCount = 0;
-  for (const [_fret, strings] of fretToStrings) {
-    if (strings.size === 1) {
-      fingerCount += 1;
-    } else {
-      fingerCount += 1;
+
+  // Barre: For each fret, count groups of adjacent strings as 1 finger each
+  for (const [_fret, strings] of fretToStrings.entries()) {
+    const sortedStrings = strings.sort((a, b) => a - b);
+
+    // Count runs of adjacent strings
+    let currRunCount = 1;
+
+    for (let i = 1; i < sortedStrings.length; i++) {
+      if (sortedStrings[i] === sortedStrings[i - 1] + 1) {
+        // Adjacent string
+        continue;
+      } else {
+        // Non-adjacent string
+        fingerCount += 1;
+        currRunCount = 1; // reset for new run
+      }
     }
+
+    // Count finger for the last run in this fret group
+    fingerCount += 1;
   }
 
   return fingerCount;
 }
+
 
 function fretSpan(shape: FingerPosition[]): number {
   const frets = shape
