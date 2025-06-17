@@ -64,9 +64,6 @@ function countFingers(shape: FingerPosition[]): number {
   for (const [_fret, strings] of fretToStrings.entries()) {
     const sortedStrings = strings.sort((a, b) => a - b);
 
-    // Count runs of adjacent strings
-    let currRunCount = 1;
-
     for (let i = 1; i < sortedStrings.length; i++) {
       if (sortedStrings[i] === sortedStrings[i - 1] + 1) {
         // Adjacent string
@@ -74,7 +71,6 @@ function countFingers(shape: FingerPosition[]): number {
       } else {
         // Non-adjacent string
         fingerCount += 1;
-        currRunCount = 1; // reset for new run
       }
     }
 
