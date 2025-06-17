@@ -1,12 +1,8 @@
-// App.tsx
-import { type ChordSpec, type ConstraintProfile, generateCandidateShapes } from './lib/chord-finder';
+import { createSignal } from 'solid-js';
+import { type ConstraintProfile, generateCandidateShapes } from './lib/chord-finder';
 import ChordDiagram from './ChordDiagram';
 import './style.css';
-
-const G: ChordSpec = {
-    notes: new Set(["G", "B", "D"]),
-    rootNote: "G",
-};
+import { chromaticScale, getMajorChordNotes } from './lib/notes';
 
 const constraints: ConstraintProfile = {
     maxFingers: 4,
@@ -17,14 +13,31 @@ const constraints: ConstraintProfile = {
     requireRootInBass: false,
 };
 
-const chordShapes = generateCandidateShapes(G, constraints);
-
 export default function App() {
+    const [rootNote, setRootNote] = createSignal("G");
+
+    const chordSpec = () => ({
+        rootNote: rootNote(),
+        notes: getMajorChordNotes(rootNote()),
+    });
+
+    const chordShapes = () => generateCandidateShapes(chordSpec(), constraints);
+
     return (
         <main>
-            <h1>G</h1>
+            <h1>Major Chord Shapes</h1>
+
+            <label>
+                Select root note:
+                <select value={rootNote()} onChange={(e) => setRootNote(e.currentTarget.value)}>
+                    {chromaticScale.map(note => (
+                        <option value={note}>{note}</option>
+                    ))}
+                </select>
+            </label>
+
             <section class="chord-diagrams">
-                {chordShapes.map((shape) => (
+                {chordShapes().map((shape) => (
                     <ChordDiagram shape={shape} />
                 ))}
             </section>

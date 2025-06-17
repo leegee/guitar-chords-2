@@ -1,3 +1,5 @@
+import { chromaticScale } from "./notes";
+
 export type StringNumber = 1 | 2 | 3 | 4 | 5 | 6;
 type FretNumber = number; // 0 = open, -1 = muted
 
@@ -32,11 +34,6 @@ const openStringNotes: Record<StringNumber, string> = {
   2: "B",
   1: "E",
 };
-
-// Simple chromatic scale for note calculations
-const chromaticScale = [
-  "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-];
 
 function noteAt(stringNum: StringNumber, fret: FretNumber): string | null {
   if (fret < 0) return null; // muted string, no note

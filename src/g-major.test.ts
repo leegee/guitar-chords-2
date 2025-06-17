@@ -8,6 +8,7 @@ import {
     type FingerPosition,
     type StringNumber,
 } from "./lib/chord-finder";
+import { chromaticScale } from "./lib/notes";
 
 const G: ChordSpec = {
     notes: new Set(["G", "B", "D"]),
@@ -31,10 +32,6 @@ const openStringNotes: Record<number, string> = {
     2: "B",
     1: "E",
 };
-
-const chromaticScale = [
-    "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-];
 
 export function noteAt(stringNum: number, fret: number): string | null {
     if (fret < 0) return null;
