@@ -47,6 +47,12 @@ h1 {
   padding: 2em;
 }
 
+.chord-diagrams {
+  padding: 2em;
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .read-the-docs {
   color: #888;
 }

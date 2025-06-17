@@ -21,13 +21,13 @@ const chordShapes = generateCandidateShapes(G, constraints);
 
 export default function App() {
     return (
-        <div>
+        <main>
             <h1>G</h1>
-            <div class="card">
+            <section class="chord-diagrams">
                 {chordShapes.map((shape) => (
                     <ChordDiagram shape={shape} />
                 ))}
-            </div>
-        </div>
+            </section>
+        </main>
     );
 }
