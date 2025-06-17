@@ -1,6 +1,6 @@
 // App.tsx
 import { type ChordSpec, type ConstraintProfile, generateCandidateShapes } from './lib/chord-finder';
-import ChordDiagram from './chord-shape';
+import ChordDiagram from './ChordDiagram';
 import './style.css';
 
 const G: ChordSpec = {
