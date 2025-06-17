@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npx tsx **/*.test.ts",
     "dev": "vite",
-    "deploy": "gh-pages -d dist",
+    "deploy": "tsc && vite build && gh-pages -d dist",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -16,6 +16,7 @@
     "gh-pages": "^6.3.0",
     "sass": "^1.89.2",
     "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vite-plugin-solid": "^2.11.6"
   },
