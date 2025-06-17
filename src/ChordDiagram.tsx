@@ -47,24 +47,28 @@ export default function ChordDiagram(props: ChordDiagramProps) {
 
       {/* Fret Rows */}
       <For each={Array.from({ length: numFrets() }, (_, i) => startFret() + i)}>
-        {(fret) => (
-          <div class="fret-row">
-            <div class="fret-label">
-              <Show when={startFret() > 1}>{fret}</Show>
+        {(fret) => {
+          const fretMod = fret % 12;
+          const showFretNum = fretMod === 3 || fretMod === 5 || fretMod === 7 || fretMod === 9 || fretMod === 0;
+          return (
+            <div class="fret-row">
+              <div class="fret-label">
+                <Show when={showFretNum}>{fret}</Show>
+              </div>
+              <For each={stringOrder}>
+                {(s) => {
+                  const pos = findPos(s);
+                  const match = pos?.fret === fret;
+                  return (
+                    <div class="note">
+                      {match ? (pos?.finger?.toString() ?? "●") : "\u00A0"}
+                    </div>
+                  );
+                }}
+              </For>
             </div>
-            <For each={stringOrder}>
-              {(s) => {
-                const pos = findPos(s);
-                const match = pos?.fret === fret;
-                return (
-                  <div class="note">
-                    {match ? (pos?.finger?.toString() ?? "●") : "\u00A0"}
-                  </div>
-                );
-              }}
-            </For>
-          </div>
-        )}
+          )
+        }}
       </For>
     </section>
   );
