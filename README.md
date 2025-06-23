@@ -1,5 +1,7 @@
 # guitar-chords
 
+![./screenshot.png](./screenshot.png)
+
 Some years ago I wrote a web app to illustrate  guitar chords for my daughter who had 
 just started learning the instrument.
 
